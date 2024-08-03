@@ -73,21 +73,24 @@ def tataplay_playlist():
             license_key = ''
             try:
                 license_key = (
-                    f'{{"keys":[{{"kty":"oct","k":{hex_to_base64(channel["licence2"])},"kid":{hex_to_base64(channel["licence1"])}}}],"type":"temporary"}}'
+                    f'{{"keys":[{{"kty":"oct","k":"{hex_to_base64(channel["licence2"])}","kid":"{hex_to_base64(channel["licence1"])}"}}],"type":"temporary"}}'
                 )
             except Exception as e:
                 logger.error(f"Error processing license key for channel {tvg_id}: {e}")
 
             m3u_playlist.append(
-                f'#EXTINF:-1 tvg-id="{tvg_id}" group-title="{group_title}", tvg-logo="{tvg_logo}", {title}\n'
+                f'#EXTINF:-1 tvg-id="{tvg_id}" group-title="{group_title}" tvg-logo="{tvg_logo}",{title}\n'
                 f'#KODIPROP:inputstream.adaptive.license_type=clearkey\n'
                 f'#KODIPROP:inputstream.adaptive.license_key={license_key}\n'
                 f'#EXTVLCOPT:http-user-agent={user_agent}\n'
-                f'#EXTHTTP:{{"cookie":"{hdntl}"}}\n'
-                f'{mpd}|cookie:{hdntl}\n\n'
+                f'#EXTVLCOPT:http-cookie={hdntl}\n'
+                f'{mpd}\n\n'
             )
 
         return Response(''.join(m3u_playlist), content_type='text/plain')
     except Exception as e:
         logger.error(f"Failed to fetch playlist data: {e}")
         return jsonify({"error": "Failed to fetch playlist data"}), 500
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000)
